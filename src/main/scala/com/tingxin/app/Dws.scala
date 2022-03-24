@@ -11,8 +11,8 @@ import com.amazon.deequ.constraints.ConstraintStatus
 object Dws extends App{
 
   val spark: SparkSession = SparkSession.builder()
-    .master("local[1]")
-    .appName("SparkByExamples.com")
+    .master("yarn")
+    .appName("com.tingxin")
     .getOrCreate()
 
   spark.sparkContext.setLogLevel("ERROR")

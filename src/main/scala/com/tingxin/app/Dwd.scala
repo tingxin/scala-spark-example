@@ -11,8 +11,9 @@ import com.amazon.deequ.constraints.ConstraintStatus
 object Dwd extends App{
 
   val spark: SparkSession = SparkSession.builder()
-    .master("local[1]")
-    .appName("SparkByExamples.com")
+    .master("yarn")
+//    .config("spark.driver.bindAddress", "127.0.0.1")
+    .appName("com.tingxin")
     .getOrCreate()
 
   spark.sparkContext.setLogLevel("ERROR")
