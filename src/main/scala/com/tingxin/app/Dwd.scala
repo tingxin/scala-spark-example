@@ -18,6 +18,9 @@ object Dwd extends App {
     .getOrCreate()
 
   val sourceTbName = "flink_hudi_order"
+  val targetTbName = "spark_hudi_order_dwd"
+  val basePath = "s3://tx-workshop/rongbai/spark/hudi_order_dwd1/"
+
   val df = spark.sql(
     s"select order_id,user_mail,good_count,status,create_time,logday from $sourceTbName where logday > '2022-03-20'"
   )
@@ -54,6 +57,27 @@ object Dwd extends App {
         println(s"${result.constraint}: ${result.message.get}")
       }
   }
+
+  val hudiOptions = Map(
+    "hoodie.table.name" -> targetTbName,
+    "hoodie.datasource.write.recordkey.field"->  "order_id",
+    "hoodie.datasource.write.partitionpath.field"->  "ts",
+    "hoodie.datasource.write.table.name"->  targetTbName,
+    "hoodie.datasource.write.operation"->  "upsert",
+    "hoodie.datasource.write.precombine.field"->  "ts",
+    "hoodie.upsert.shuffle.parallelism"->  2
+  )
+
+  df.write.format("hudi")
+    .option("hoodie.table.name", targetTbName)
+    .option("hoodie.datasource.write.recordkey.field", "order_id")
+    .option("hoodie.datasource.write.partitionpath.field", "ts")
+    .option("hoodie.datasource.write.table.name", targetTbName)
+    .option("hoodie.datasource.write.operation",  "upsert")
+    .option("hoodie.datasource.write.precombine.field", "ts")
+    .option("hoodie.upsert.shuffle.parallelism", 2)
+    .mode("overwrite")
+    .save(basePath)
 
   spark.sparkContext.stop()
 }
