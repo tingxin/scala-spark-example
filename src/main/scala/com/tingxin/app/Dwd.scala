@@ -16,35 +16,25 @@ object Dwd extends App {
     .appName("com.tingxin")
     .getOrCreate()
 
-  val rdd = spark.sparkContext.parallelize(
-    Seq(
-      Item(1, "Thingy A", "awesome thing.", "high", 0),
-      Item(2, "Thingy B", "available at http://thingb.com", null, 0),
-      Item(3, null, null, "low", 5),
-      Item(4, "Thingy D", "checkout https://thingd.ca", "low", 10),
-      Item(5, "Thingy E", null, "high", 12)
-    )
-  )
+  val sourceTbName = "flink_hudi_order"
+  val df = spark.sql(s"select order_id,user_mail,good_count,create_time,logday from $sourceTbName where logday > '2022-03-20'")
+  df.show(10)
 
-  val data = spark.createDataFrame(rdd)
-
-  data.show(10)
 
   val verificationResult = VerificationSuite()
-    .onData(data)
+    .onData(df)
     .addCheck(
       Check(CheckLevel.Error, "unit testing my data")
-        .hasSize(_ == 5) // we expect 5 rows
-        .isComplete("id") // should never be NULL
-        .isUnique("id") // should not contain duplicates
-        .isComplete("productName") // should never be NULL
+        .hasSize(_ > 10) // we expect 5 rows
+        .isComplete("order_id") // should never be NULL
+        .isUnique("order_id") // should not contain duplicates
+        .isComplete("user_mail") // should never be NULL
         // should only contain the values "high" and "low"
-        .isContainedIn("priority", Array("high", "low"))
-        .isNonNegative("numViews") // should not contain negative values
+        .isContainedIn("status", Array("unpaid", "paid", "cancel", "shipping"))
+        .isNonNegative("good_count") // should not contain negative values
         // at least half of the descriptions should contain a url
-        .containsURL("description", _ >= 0.5)
         // half of the items should have less than 10 views
-        .hasApproxQuantile("numViews", 0.5, _ <= 10)
+        .hasApproxQuantile("good_count", 0.5, _ <= 10)
     )
     .run()
 
