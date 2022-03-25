@@ -20,7 +20,7 @@ object Dwd extends App {
     .appName("com.tingxin")
     .getOrCreate()
 
-  val sourceTbName = "flink_hudi_order"
+  val sourceTbName = "flink_hudi_order_ods"
   val targetTbName = "spark_hudi_order_dwd"
   val basePath = "s3://tx-workshop/rongbai/spark/hudi_order_dwd1/"
 
