@@ -61,20 +61,21 @@ object Dwd extends App {
       }
   }
 
-
   df.write.format("hudi")
     .options(getQuickstartWriteConfigs)
     .option(PRECOMBINE_FIELD.key(), "ts")
     .option(RECORDKEY_FIELD.key(), "order_id")
     .option(PARTITIONPATH_FIELD.key(), "logday")
+    .option(OPERATION.key(), "upsert")
     .option(DataSourceWriteOptions.TABLE_NAME.key(), targetTbName)
     .option("hoodie.datasource.hive_sync.enable", "true")
+    .option("hoodie.datasource.hive_sync.database","default")
     .option("hoodie.datasource.hive_sync.table", targetTbName)
     .option("hoodie.datasource.hive_sync.mode","HMS")
-    .option("hive_sync.use_jdbc","false")
-    .option("hive_sync.username","hadoop")
-    .option("hive_sync.partition_fields", "logday,hh")
-    .option("hoodie.datasource.hive_sync.database","default")
+    .option("hoodie.datasource.hive_sync.use_jdbc","false")
+    .option("hoodie.datasource.hive_sync.username","hadoop")
+    .option("hoodie.datasource.hive_sync.partition_fields", "logday,hh")
+    .option("hoodie.datasource.hive_sync.partition_extractor_class","org.apache.hudi.hive.MultiPartKeysValueExtractor")
     .mode(SaveMode.Append)
     .save(basePath)
 
