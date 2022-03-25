@@ -1,13 +1,16 @@
 package com.tingxin.app
 
 import org.apache.spark._
-import com.tingxin.entity.Item
-import org.apache.spark.sql.functions.array_contains
-import org.apache.spark.sql.types.{ArrayType, StringType, StructType}
 import org.apache.spark.sql.{Row, SparkSession}
 import com.amazon.deequ.VerificationSuite
 import com.amazon.deequ.checks.{Check, CheckLevel, CheckStatus}
 import com.amazon.deequ.constraints.ConstraintStatus
+import org.apache.hudi.DataSourceWriteOptions
+import org.apache.spark.sql.SaveMode
+import org.apache.hudi.QuickstartUtils._
+import org.apache.hudi.DataSourceWriteOptions._
+import org.apache.hudi.config.HoodieWriteConfig._
+
 
 /** Computes an approximation to pi */
 object Dwd extends App {
@@ -58,25 +61,21 @@ object Dwd extends App {
       }
   }
 
-  val hudiOptions = Map(
-    "hoodie.table.name" -> targetTbName,
-    "hoodie.datasource.write.recordkey.field"->  "order_id",
-    "hoodie.datasource.write.partitionpath.field"->  "ts",
-    "hoodie.datasource.write.table.name"->  targetTbName,
-    "hoodie.datasource.write.operation"->  "upsert",
-    "hoodie.datasource.write.precombine.field"->  "ts",
-    "hoodie.upsert.shuffle.parallelism"->  2
-  )
 
   df.write.format("hudi")
-    .option("hoodie.table.name", targetTbName)
-    .option("hoodie.datasource.write.recordkey.field", "order_id")
-    .option("hoodie.datasource.write.partitionpath.field", "ts")
-    .option("hoodie.datasource.write.table.name", targetTbName)
-    .option("hoodie.datasource.write.operation",  "upsert")
-    .option("hoodie.datasource.write.precombine.field", "ts")
-    .option("hoodie.upsert.shuffle.parallelism", 2)
-    .mode("overwrite")
+    .options(getQuickstartWriteConfigs)
+    .option(PRECOMBINE_FIELD.key(), "ts")
+    .option(RECORDKEY_FIELD.key(), "order_id")
+    .option(PARTITIONPATH_FIELD.key(), "logday")
+    .option(DataSourceWriteOptions.TABLE_NAME.key(), targetTbName)
+    .option("hoodie.datasource.hive_sync.enable", "true")
+    .option("hoodie.datasource.hive_sync.table", targetTbName)
+    .option("hoodie.datasource.hive_sync.mode","HMS")
+    .option("hive_sync.use_jdbc","false")
+    .option("hive_sync.username","hadoop")
+    .option("hive_sync.partition_fields", "logday,hh")
+    .option("hoodie.datasource.hive_sync.database","default")
+    .mode(SaveMode.Append)
     .save(basePath)
 
   spark.sparkContext.stop()
