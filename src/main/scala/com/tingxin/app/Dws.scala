@@ -4,9 +4,9 @@ import com.tingxin.entity.Item
 import org.apache.spark.sql.functions.array_contains
 import org.apache.spark.sql.types.{ArrayType, StringType, StructType}
 import org.apache.spark.sql.{Row, SparkSession}
-import com.amazon.deequ.VerificationSuite
-import com.amazon.deequ.checks.{Check, CheckLevel, CheckStatus}
-import com.amazon.deequ.constraints.ConstraintStatus
+// import com.amazon.deequ.VerificationSuite
+// import com.amazon.deequ.checks.{Check, CheckLevel, CheckStatus}
+// import com.amazon.deequ.constraints.ConstraintStatus
 
 object Dws extends App {
 
@@ -32,37 +32,37 @@ object Dws extends App {
 
   data.show(10)
 
-  val verificationResult = VerificationSuite()
-    .onData(data)
-    .addCheck(
-      Check(CheckLevel.Error, "unit testing my data")
-        .hasSize(_ == 5) // we expect 5 rows
-        .isComplete("id") // should never be NULL
-        .isUnique("id") // should not contain duplicates
-        .isComplete("productName") // should never be NULL
-        // should only contain the values "high" and "low"
-        .isContainedIn("priority", Array("high", "low"))
-        .isNonNegative("numViews") // should not contain negative values
-        // at least half of the descriptions should contain a url
-        .containsURL("description", _ >= 0.5)
-        // half of the items should have less than 10 views
-        .hasApproxQuantile("numViews", 0.5, _ <= 10)
-    )
-    .run()
+  // val verificationResult = VerificationSuite()
+  //   .onData(data)
+  //   .addCheck(
+  //     Check(CheckLevel.Error, "unit testing my data")
+  //       .hasSize(_ == 5) // we expect 5 rows
+  //       .isComplete("id") // should never be NULL
+  //       .isUnique("id") // should not contain duplicates
+  //       .isComplete("productName") // should never be NULL
+  //       // should only contain the values "high" and "low"
+  //       .isContainedIn("priority", Array("high", "low"))
+  //       .isNonNegative("numViews") // should not contain negative values
+  //       // at least half of the descriptions should contain a url
+  //       .containsURL("description", _ >= 0.5)
+  //       // half of the items should have less than 10 views
+  //       .hasApproxQuantile("numViews", 0.5, _ <= 10)
+  //   )
+  //   .run()
 
-  if (verificationResult.status == CheckStatus.Success) {
-    println("The data passed the test, everything is fine!")
-  } else {
-    println("Dws data quality:\n")
+  // if (verificationResult.status == CheckStatus.Success) {
+  //   println("The data passed the test, everything is fine!")
+  // } else {
+  //   println("Dws data quality:\n")
 
-    val resultsForAllConstraints = verificationResult.checkResults
-      .flatMap { case (_, checkResult) => checkResult.constraintResults }
+  //   val resultsForAllConstraints = verificationResult.checkResults
+  //     .flatMap { case (_, checkResult) => checkResult.constraintResults }
 
-    resultsForAllConstraints
-      .filter { _.status != ConstraintStatus.Success }
-      .foreach { result =>
-        println(s"${result.constraint}: ${result.message.get}")
-      }
-  }
+  //   resultsForAllConstraints
+  //     .filter { _.status != ConstraintStatus.Success }
+  //     .foreach { result =>
+  //       println(s"${result.constraint}: ${result.message.get}")
+  //     }
+  // }
   spark.sparkContext.stop()
 }

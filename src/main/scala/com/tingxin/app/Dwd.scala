@@ -13,13 +13,15 @@ import com.amazon.deequ.constraints.ConstraintStatus
 object Dwd extends App {
   val spark: SparkSession = SparkSession
     .builder()
+    .enableHiveSupport()
     .appName("com.tingxin")
     .getOrCreate()
 
   val sourceTbName = "flink_hudi_order"
-  val df = spark.sql(s"select order_id,user_mail,good_count,create_time,logday from $sourceTbName where logday > '2022-03-20'")
+  val df = spark.sql(
+    s"select order_id,user_mail,good_count,status,create_time,logday from $sourceTbName where logday > '2022-03-20'"
+  )
   df.show(10)
-
 
   val verificationResult = VerificationSuite()
     .onData(df)
