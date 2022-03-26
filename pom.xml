@@ -12,7 +12,7 @@
     <properties>
         <scala.version>2.12.12</scala.version>
         <scala.binary.version>2.12</scala.binary.version>
-        <spark.version>3.1.1</spark.version>
+        <spark.version>3.1.2</spark.version>
         <scope.type>provided</scope.type>
     </properties>
 
@@ -95,12 +95,13 @@
             <groupId>org.apache.hudi</groupId>
             <artifactId>hudi-common</artifactId>
             <version>0.10.1</version>
-            <scope>compile</scope>
+             <scope>${scope.type}</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.hudi</groupId>
             <artifactId>hudi-spark-bundle_2.12</artifactId>
             <version>0.10.1</version>
+             <scope>${scope.type}</scope>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.httpcomponents</groupId>
