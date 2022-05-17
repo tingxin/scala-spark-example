@@ -18,7 +18,7 @@ object CheckDws extends App {
     .appName("com.tingxin")
     .getOrCreate()
 
-  val sourceTbName = "spark_hudi_order_dwd"
+  val sourceTbName = "spark_yunji_order_dws"
 
   val qualityBasePath = "s3://tx-workshop/rongbai/spark/quality_stat/"
 
@@ -33,10 +33,8 @@ object CheckDws extends App {
         .isComplete("logday") // should never be NULL
         .hasMin("order_count",  x=> x == 10)
         .hasMax("order_count", x=> x == 10000)
-        .hasMin("user_count", x=> x == 10)
-        .hasMax("user_count", x=> x == 100)
-        .hasMin("user_count", x=> x == 10)
-        .hasMax("user_count", x=> x == 100)
+        .hasMin("good_count", x=> x == 10)
+        .hasMax("good_count", x=> x == 100)
         .hasApproxQuantile("good_count", 0.5, _ <= 10)
     )
     .run()

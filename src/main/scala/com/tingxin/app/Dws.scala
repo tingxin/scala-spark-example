@@ -19,16 +19,11 @@ object Dws extends App {
     .appName("com.tingxin")
     .getOrCreate()
 
-  val sourceTbName = "yunji_order_dwd"
   val targetTbName = "spark_yunji_order_dws"
   val basePath = "s3://tx-workshop/yunji/spark/yunji_order_dws/"
 
   val df = spark.sql(
-    s"select COUNT(order_id) as order_count," +
-      s"COUNT(DISTINCT user_mail) as user_count," +
-      s"SUM(good_count) as good_count," +
-      s"MAX(ts) as ts," +
-      s"logday from $sourceTbName group by logday"
+    s"select logday,city,sex, spu, COUNT(order_id) as order_count,SUM(good_count) as good_count from yunji_order_dwd group by logday, city, sex, spu"
   )
   df.show(10)
 
